@@ -1,140 +1,233 @@
 openapi: 3.0.1
 info:
   title: Todo-Listen-Verwaltung
-  description: ""
+  version: 1.0.0
+  description: Eine REST-API zur Verwaltung von Todo-Listen und deren Einträgen.
   contact:
-    email: test@test.de
+    email: f.kroeger@ambition-performance.de
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 0.1.0
+
 servers:
-- url: http://127.0.0.1:5000/
+  - url: http://127.0.0.1:5000/
+
 tags:
-- name: Listenverwaltung
+  - name: Listenverwaltung
+    description: Endpunkte zur Verwaltung von Todo-Listen und deren Einträgen
+
 paths:
-  /todo-list/{list_id}:
+
+  /todo-lists:
     get:
-      tags:
-      - Listenverwaltung
-      summary: Get all items from list
-      operationId: getList
-      parameters:
-      - name: list_id
-        in: path
-        description: list id
-        required: true
-        schema:
-          type: string
+      tags: [Listenverwaltung]
+      summary: Alle Listen anzeigen
+      operationId: getAllLists
       responses:
         200:
-          description: List item returned
+          description: Liste aller Todo-Listen
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TodoEntry'
-        404:
-          description: Invalid list id
-          content: {}
-    delete:
-      tags:
-      - Listenverwaltung
-      summary: Delete a list
-      operationId: deleteList
-      parameters:
-      - name: list_id
-        in: path
-        description: list id
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: List was deleted
-          content: {}
-        404:
-          description: Invalid list id
-          content: {}
+                  $ref: '#/components/schemas/TodoList'
+        500:
+          description: Interner Serverfehler
+
   /todo-list:
     post:
       tags:
-      - Listenverwaltung
-      summary: Add new list
-      operationId: addList
+        - Listenverwaltung
+      summary: Eine neue ToDo-Liste erstellen
       requestBody:
-        description: list object
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TodoList'
-        required: true
       responses:
-        200:
-          description: List added
+        '200':
+          description: Liste wurde erstellt
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TodoList'
-        500:
-          description: List could not be added
-          content: {}
-  /todo-list/{list_id}/entries:
+        '400':
+          description: Fehlerhafte Anfrage
+
+
+  /todo-list/{list_id}:
     get:
-      tags:
-      - Listenverwaltung
-      summary: Liefert alle Einträge einer Todo-Liste zurück.
-      operationId: getItems
+      tags: [Listenverwaltung]
+      summary: Eine Liste anzeigen
+      operationId: getListById
       parameters:
-      - name: list_id
-        in: path
-        description: list id
-        required: true
-        schema:
-          type: string
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         200:
-          description: All list items
+          description: Liste erfolgreich gefunden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoList'
+        404:
+          description: Liste nicht gefunden
+        500:
+          description: Interner Serverfehler
+
+    delete:
+      tags: [Listenverwaltung]
+      summary: Liste löschen
+      operationId: deleteList
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Liste erfolgreich gelöscht
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: success
+        404:
+          description: Liste nicht gefunden
+        500:
+          description: Interner Serverfehler
+
+  /todo-list/{list_id}/entries:
+    get:
+      tags: [Listenverwaltung]
+      summary: Einträge einer Liste anzeigen
+      operationId: getListEntries
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Liste der Einträge
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/TodoEntry'
+        404:
+          description: Liste nicht gefunden
         500:
-          description: Could not load entries
-          content: {}
+          description: Interner Serverfehler
+
     post:
-      tags:
-      - Listenverwaltung
-      summary: Add new entry
-      operationId: addEntry
+      tags: [Listenverwaltung]
+      summary: Eintrag zu einer Liste hinzufügen
+      operationId: addEntryToList
       parameters:
-      - name: list_id
-        in: path
-        description: list id
-        required: true
-        schema:
-          type: string
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: list object
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TodoList'
-        required: true
+              $ref: '#/components/schemas/TodoEntry'
       responses:
         200:
-          description: List added
+          description: Eintrag erfolgreich hinzugefügt
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TodoList'
+                $ref: '#/components/schemas/TodoEntry'
+        400:
+          description: Ungültiger Request
+        404:
+          description: Liste nicht gefunden
         500:
-          description: List could not be added
-          content: {}
-      x-codegen-request-body-name: body
+          description: Interner Serverfehler
+
+  /todo-list/{list_id}/entry/{entry_id}:
+    put:
+      tags: [Listenverwaltung]
+      summary: Eintrag aktualisieren
+      operationId: updateEntry
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoEntry'
+      responses:
+        200:
+          description: Eintrag erfolgreich aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoEntry'
+        400:
+          description: Ungültiger Request
+        404:
+          description: Eintrag oder Liste nicht gefunden
+        500:
+          description: Interner Serverfehler
+
+    delete:
+      tags: [Listenverwaltung]
+      summary: Eintrag löschen
+      operationId: deleteEntry
+      parameters:
+        - name: list_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Eintrag erfolgreich gelöscht
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: success
+        404:
+          description: Eintrag oder Liste nicht gefunden
+        500:
+          description: Interner Serverfehler
+
 components:
   schemas:
     TodoList:
