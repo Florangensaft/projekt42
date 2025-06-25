@@ -105,4 +105,5 @@ def deleteEntry(list_id, entry_id):
     return '', 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True) use this for testing purposes
+    app.run(host='0.0.0.0', port=5000) #runs on port 5000
