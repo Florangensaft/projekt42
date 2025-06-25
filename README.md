@@ -97,3 +97,16 @@ docker run -d -p 5000:5000 projekt42
 - `-d`: Führt den Container im `Detached-Modus`aus. Der bedeutet, dass der Container im Hintergrund läuft.
 - `-p 5000:5000`: Leitet den Port **5000** des Hosts (linker Wert) auf den Port **5000** im Container (rechter Wert) weiter
 - `projekt43`: Der Name des Docker-Images, das beim Build-Vorgang erstellt wurde
+
+## Erste Testabfrage
+Nach erfolgreichem Setup kann die erste Testabfrage gestartet werden - dazu eignen sich Tools wie z.B. postman diese kann z.B. an den Endpunkt (IP Anpassen)
+```url
+https://192.168.24.110:5000/todo-list
+```
+mit dem Body
+```json
+{
+  "name":"Meine erste Liste"
+}
+```
+gesendet werden.
